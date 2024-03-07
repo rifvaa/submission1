@@ -1,5 +1,4 @@
 import streamlit as st
-from st_on_hover_tabs import on_hover_tabs
 import pandas as pd
 import matplotlib.pyplot as plt
 from babel.numbers import format_currency
