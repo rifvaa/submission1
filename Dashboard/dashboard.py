@@ -1,14 +1,15 @@
+import streamlit as st
 from st_on_hover_tabs import on_hover_tabs
 import pandas as pd
-import streamlit as st
 import matplotlib.pyplot as plt
 from babel.numbers import format_currency
 
 
 
-st.set_page_config(layout="wide")
 
+st.set_page_config(layout="wide")
 st.markdown('<style>' + open('./style.css').read() + '</style>', unsafe_allow_html=True)
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
 with st.sidebar:
@@ -16,48 +17,31 @@ with st.sidebar:
                          iconName=['📃', '💻', '❕'], default_choice=0)
 
 if tabs =='Profile':
-    st.subheader("Name : Muhammad Rifva Maulana \n\n ✉\t gmail : maulanarifva@gmailcom\n\n")
+    st.subheader("Name : Muhammad Rifva Maulana \n\n ✉\t gmail : maulanarifva@gmailcom\n\n ID Dicoding : muhammad_rifva")
+   
     
 elif tabs == 'Projects':
     st.header("Proyek Analisis Data: Bike-sharing-dataset")
     st.subheader("\n\nVisualization & Explanatory Analysis")
     st.write("Pertanyaan 1: Bagaimana perkembangan penyewaan sepeda selama 1 tahun ?\n\n Pertanyaan 2: Apa penyebab minat penyewa sepeda naik & turun ?")
     
-    def main():
-        st.title('Perkembangan Penyewaan Sepeda Selama 1 Tahun')
-
-        # Membaca data dari file CSV
-        day_df = pd.read_csv("day_all.csv")
-
-        # Mengambil kolom bulan dan jumlah penyewaan
-        bulan = day_df['Bulan']
-        jumlah_penyewaan = day_df['Ttl_Penyewa']
-
-        # Membuat plot histogram
-        fig, ax = plt.subplots()
-        ax.bar(bulan, jumlah_penyewaan, color='skyblue')
-
-        # Menambahkan judul dan label sumbu
-        ax.set_title('Perkembangan Penyewaan Sepeda Selama 1 Tahun')
-        ax.set_xlabel('1 Tahun')
-        ax.set_ylabel('Jumlah Penyewaan')
-
-        # Agar label bulan tidak bertumpuk
+    def plot_bike_rental_by_month(day_df):
+        plt.figure(figsize=(8, 4))  
+        plt.bar(day_df['Bulan'], day_df['Ttl_Penyewa'], color='skyblue')
+        plt.title('Perbandingan Jumlah Penyewaan Sepeda berdasarkan Bulan')
+        plt.xlabel('Bulan')
+        plt.ylabel('Jumlah Penyewaan')
         plt.xticks(rotation=45)
-
-        # Menampilkan plot histogram di Streamlit
-        st.pyplot(fig)
-
-    if __name__ == "__main__":
-        main()
-
-    def load_data():
-        day_df = pd.read_csv("day_all.csv")
-        return day_df
+        st.pyplot()
+        
+        expander = st.expander("Kesimpulan")
+        expander.write("Kenaikan: Dari histogram, terlihat bahwa jumlah penyewa cenderung meningkat dari bulan Januari hingga Mei, mencapai puncaknya pada bulan Mei, dan kemudian menurun secara bertahap hingga Desember. Ini bisa mengindikasikan tren musiman di mana permintaan penyewaan meningkat pada musim semi dan kemudian menurun menjelang akhir tahun.")
+        expander.write("Bulanan: Beberapa bulan memiliki lonjakan tajam dalam jumlah penyewa, sementara yang lain mungkin memiliki fluktuasi yang lebih stabil.")
+        expander.write("Prediksi & Ramalan: Histogram ini memberikan gambaran umum tentang pola perilaku penyewa sepanjang tahun. Informasi ini dapat digunakan untuk merencanakan strategi bisnis seperti penentuan harga, promosi, dan manajemen persediaan untuk mengakomodasi fluktuasi permintaan.")
+        
     def plot_bike_usage_by_factors(day_df):
-        plt.figure(figsize=(12, 8))
+        plt.figure(figsize=(8, 4))
 
-    # Plotting
         categorical_vars = ['Musim', 'Cuaca', 'workingday', 'weekday']
         colors = ['blue', 'red', 'green', 'purple']
 
@@ -69,22 +53,35 @@ elif tabs == 'Projects':
         plt.ylabel('Jumlah Penggunaan Sepeda')
         plt.title('Penggunaan Sepeda Berdasarkan Faktor-faktor')
         plt.xticks(range(len(mean_ttl_penyewa)), mean_ttl_penyewa.index, rotation=45, ha='right')
-
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
-
-        # Menampilkan plot menggunakan Streamlit
+        
         st.pyplot()
+        
+        expander = st.expander("Kesimpulan")
+        expander.write("Musim: Penggunaan sepeda cenderung lebih tinggi pada musim Fall dan musim dingin Winter, mungkin karena kondisi cuaca yang lebih nyaman dan menjadi bersemangat melakukan aktivitas.")
+        expander.write("Cuaca: Cuaca cerah atau sebagian berawan terkait dengan penggunaan sepeda yang lebih tinggi dibandingkan dengan cuaca berkabut atau berawan dan cuaca salju ringan atau hujan, yang mungkin memengaruhi kenyamanan dan keamanan bersepeda.")
+        expander.write("Hari Kerja: Meskipun penggunaan sepeda pada hari libur sedikit lebih tinggi, tidak ada perbedaan yang signifikan antara penggunaan sepeda pada hari kerja dan hari libur.")
+        expander.write("Hari dalam Seminggu/weekday: Penggunaan sepeda cenderung lebih tinggi pada akhir pekan dibandingkan dengan hari-hari kerja lainnya, yang mungkin karena orang memiliki lebih banyak waktu luang pada akhir pekan untuk bersepeda.")
+
+    def load_data():
+        day_df = pd.read_csv("day_all.csv")
+        return day_df
 
     def main():
-        st.title('Penggunaan Sepeda Berdasarkan Faktor-faktor')
 
-        # Load data
-        day_df = load_data()
-        
-        # Plot bike usage by factors
-        plot_bike_usage_by_factors(day_df)
+        st.header('Analisis Penyewaan Sepeda')
+        option = st.selectbox('Pilih Analisis:', ('Perbandingan Penyewaan Sepeda per Bulan', 'Penggunaan Sepeda Berdasarkan Faktor-faktor'))
+
+        if option == 'Perbandingan Penyewaan Sepeda per Bulan':
+            st.subheader('Perbandingan Jumlah Penyewaan Sepeda per Bulan')
+            day_df = load_data()
+            plot_bike_rental_by_month(day_df)
+        elif option == 'Penggunaan Sepeda Berdasarkan Faktor-faktor':
+            st.subheader('Penggunaan Sepeda Berdasarkan Faktor-faktor')
+            day_df = load_data()
+            plot_bike_usage_by_factors(day_df)
 
     if __name__ == "__main__":
         main()
